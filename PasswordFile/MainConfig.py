@@ -287,38 +287,58 @@ class Window(QMainWindow):
     def get_account_info(self):
         self.main_layout.setCurrentIndex(4)
         self.choose_account.clear()
+        AccountSave.filter = "All"
         self.update_filter()
         self.choose_account_type_to_view.setCurrentIndex(self.choose_account_type_to_view.findText("All", QtCore.Qt.MatchFixedString))
-        self.choose_account.clear()
-
-        for account in AccountSave.get_accounts():
-            self.choose_account.addItem(account[0])
+        self.reset_choose_account_list()
 
     def update_account_get(self, account_name):
-        for account in AccountSave.get_accounts():
+        account_list = AccountSave.get_accounts()
+        account_system_widgets = [self.account_username_get, self.account_password_get, self.account_name_get]
+
+        for account in account_list:
             if account[0] == account_name:
                 self.account_username_get.setText(account[2])
                 self.account_password_get.setText(account[1])
                 self.account_name_get.setText(account[0])
 
-    def update_filter(self, new_filter="Web App"):
-        if new_filter == "Web App":
-            self.account_username_label_get.setText("Username")
-            self.account_password_label_get.setText("Password")
-            self.account_name_label_get.setText("Account Name")
-        if new_filter == "Padlock":
-            self.account_username_label_get.setText("Locker Number")
-            self.account_password_label_get.setText("Padlock Code")
-            self.account_name_label_get.setText("Locker Localization")
+                if account[3] == "Web App":
+                    self.account_username_label_get.setText("Username")
+                    self.account_password_label_get.setText("Password")
+                    self.account_name_label_get.setText("Account Name")
+                elif account[3] == "Padlock":
+                    self.account_username_label_get.setText("Locker Number")
+                    self.account_password_label_get.setText("Padlock Code")
+                    self.account_name_label_get.setText("Locker Localization")
+            for widget in account_system_widgets:
+                widget.setReadOnly(False)
 
+        if not account_list:
+            for widget in account_system_widgets:
+                widget.setText("")
+                widget.setReadOnly(True)
+            if AccountSave.filter == "Web App":
+                self.account_username_label_get.setText("Username")
+                self.account_password_label_get.setText("Password")
+                self.account_name_label_get.setText("Account Name")
+            elif AccountSave.filter == "Padlock":
+                self.account_username_label_get.setText("Locker Number")
+                self.account_password_label_get.setText("Padlock Code")
+                self.account_name_label_get.setText("Locker Localization")
+
+    def update_filter(self, new_filter="Web App"):
         AccountSave.filter = new_filter
-        self.choose_account.clear()
-        for account in AccountSave.get_accounts():
-            self.choose_account.addItem(account[0])
+        self.reset_choose_account_list()
 
     def change_account_info(self):
         AccountSave.change_account_info(self.choose_account.currentText(),
-                                        [self.account_name_get.text(), self.account_username_get.text(), self.account_password_get.text()])
+                                        [self.account_name_get.text(), self.account_password_get.text(), self.account_username_get.text()])
+        self.reset_choose_account_list()
+
+    def reset_choose_account_list(self):
+        self.choose_account.clear()
+        for account in AccountSave.get_accounts():
+            self.choose_account.addItem(account[0])
 
 def setup_window():
     app = QApplication(sys.argv)

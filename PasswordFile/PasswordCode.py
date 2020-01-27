@@ -16,7 +16,7 @@ class MyAccount(object):
 
     @classmethod
     def login(cls, username, password):
-        with open("Accounts", "r+") as accounts_file:
+        with open("Accounts", "r") as accounts_file:
             accounts_list = accounts_file.readlines()[1:]
         username_list = []
         password_list = []
@@ -65,18 +65,21 @@ class AccountSave(object):
 
     def __init__(self, web_app,  password, username, account_type):
         with open(MyAccount.currentAccount.account_save_file.strip("\n"), "a+") as password_file:
-            password_file.write("\n")
             for atr in [web_app, password, username, account_type]:
                 password_file.write(atr + "///")
+            password_file.write("\n")
 
     @classmethod
     def get_accounts(cls):
         list_of_accounts = []
         with open(MyAccount.currentAccount.account_save_file.strip("\n"), "a+") as password_file:
             password_file.seek(0)
-            for line in password_file.readlines()[1:]:
-                if line.split("///")[3] == cls.filter or cls.filter == "All":
-                    list_of_accounts.append(line.split("///"))
+            for line in password_file.readlines():
+                try:
+                    if line.split("///")[3].strip("\n") == cls.filter or cls.filter == "All":
+                        list_of_accounts.append(line.split("///"))
+                except IndexError:
+                    pass
         return list_of_accounts
 
     @classmethod
@@ -88,9 +91,10 @@ class AccountSave(object):
             for line_number, line in enumerate(account_info_file.readlines()):
                 try:
                     if account_name == line.split("///")[0]:
-                        text[line_number] = "///".join(new_line + [line.split("///")[3]])
-                except IndexError as e:
-                    print(e)
+                        print("///".join(new_line + [line.split("///")[3]]))
+                        text[line_number] = "///".join(new_line + [line.split("///")[3]] + ["\n"])
+                except IndexError :
+                    pass
 
         with open(MyAccount.currentAccount.account_save_file.strip("\n"), "w") as account_info_filew:
             print(text)
