@@ -3,8 +3,7 @@ import random
 import os
 from PyQt5.QtWidgets import QMessageBox
 
-here = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(here, 'Accounts')
+
 
 
 class MyAccount(object):
@@ -17,7 +16,7 @@ class MyAccount(object):
 
     @classmethod
     def login(cls, username, password):
-        with open(filename, "r+") as accounts_file:
+        with open("Accounts", "r+") as accounts_file:
             accounts_list = accounts_file.readlines()[1:]
         username_list = []
         password_list = []
@@ -51,7 +50,7 @@ class MyAccount(object):
 
     @classmethod
     def sign_in(cls, new_username, new_password):
-        with open(filename, "a+") as accounts_file:
+        with open("Accounts", "a+") as accounts_file:
             accounts_file.write("\n")
             accounts_file.write(f"{new_username}/{new_password}/{(random.randint(6789, 109670))}.txt")
         return cls.login(new_username, new_password)
@@ -65,13 +64,9 @@ class AccountSave(object):
     filter = "Web App"
 
     def __init__(self, web_app,  password, username, account_type):
-        self.password = password
-        self.web_app = web_app
-        self.username = username
-        self.info = [self.web_app, self.username, self.password, account_type]
         with open(MyAccount.currentAccount.account_save_file.strip("\n"), "a+") as password_file:
             password_file.write("\n")
-            for atr in self.info:
+            for atr in [web_app, password, username, account_type]:
                 password_file.write(atr + "///")
 
     @classmethod
@@ -86,18 +81,20 @@ class AccountSave(object):
 
     @classmethod
     def change_account_info(cls, account_name, new_line):
-        with open(MyAccount.currentAccount.account_save_file.strip("\n"), "r+") as account_info_file:
+        with open(MyAccount.currentAccount.account_save_file.strip("\n"), "r") as account_info_file:
+            account_info_file.seek(0)
+            text = account_info_file.readlines()
+            account_info_file.seek(0)
             for line_number, line in enumerate(account_info_file.readlines()):
-                if account_name == line.split("///")[0]:
-                    account_info_file.seek(0)
-                    text = account_info_file.readlines()
-                    print(f"line_number {line_number}")
-                    print(str("///".join(new_line)) + "new_line")
-                    text[line_number] = "///".join(new_line)
-                    print(f"line_number {text}")
-                    account_info_file.writelines(text)
-                    break
+                try:
+                    if account_name == line.split("///")[0]:
+                        text[line_number] = "///".join(new_line + [line.split("///")[3]])
+                except IndexError as e:
+                    print(e)
 
+        with open(MyAccount.currentAccount.account_save_file.strip("\n"), "w") as account_info_filew:
+            print(text)
+            account_info_filew.writelines(text)
 
 
 

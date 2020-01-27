@@ -297,8 +297,8 @@ class Window(QMainWindow):
     def update_account_get(self, account_name):
         for account in AccountSave.get_accounts():
             if account[0] == account_name:
-                self.account_username_get.setText(account[1])
-                self.account_password_get.setText(account[2])
+                self.account_username_get.setText(account[2])
+                self.account_password_get.setText(account[1])
                 self.account_name_get.setText(account[0])
 
     def update_filter(self, new_filter="Web App"):
